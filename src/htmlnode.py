@@ -6,12 +6,24 @@ class HTMLNode:
         self.props = props
 
     def to_html(self):
-        raise NotImplementedError("Subclasses should implement this method")
+        raise NotImplementedError
 
     def props_to_html(self):
         end_string = str()
         for k, v in self.props.items():
             end_string += f' {k}="{v}"' if len(end_string) != 0 else f'{k}="{v}"'
+        return end_string
 
     def __repr__(self):
         return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
+
+    def __eq__(self, other):
+        if (
+            self.tag == other.tag
+            and self.value == other.value
+            and self.children == other.children
+            and self.props == other.props
+        ):
+            return True
+        else:
+            return False
