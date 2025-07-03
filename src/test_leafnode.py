@@ -12,7 +12,8 @@ class TestLeafNode(unittest.TestCase):
         node = LeafNode("i")
         with self.assertRaises(ValueError) as e:
             node.to_html()
-        self.assertEqual(str(e.exception), "Error: No value provided for LeafNode.")
+        self.assertEqual(str(e.exception),
+                         "Error: No value provided for LeafNode.")
 
     def test_leaf_to_html_i(self):
         node = LeafNode("i", "This is italic text")
@@ -28,12 +29,15 @@ class TestLeafNode(unittest.TestCase):
         )
 
     def test_leaf_with_props(self):
-        node = LeafNode("a", "Click me", {"href": "https://www.google.com", "target": "_blank"})
-        self.assertEqual(node.to_html(), '<a href="https://www.google.com" target="_blank">Click me</a>')
+        node = LeafNode("a", "Click me", {
+                        "href": "https://www.google.com", "target": "_blank"})
+        self.assertEqual(
+            node.to_html(), '<a href="https://www.google.com" target="_blank">Click me</a>')
 
     def test_leaf_with_single_prop(self):
         node = LeafNode("p", "Styled paragraph", {"class": "highlight"})
-        self.assertEqual(node.to_html(), '<p class="highlight">Styled paragraph</p>')
+        self.assertEqual(
+            node.to_html(), '<p class="highlight">Styled paragraph</p>')
 
     def test_leaf_no_tag_returns_value(self):
         node = LeafNode(None, "Just plain text")
@@ -53,7 +57,8 @@ class TestLeafNode(unittest.TestCase):
         node = LeafNode("p", None)
         with self.assertRaises(ValueError) as e:
             node.to_html()
-        self.assertEqual(str(e.exception), "Error: No value provided for LeafNode.")
+        self.assertEqual(str(e.exception),
+                         "Error: No value provided for LeafNode.")
 
     def test_leaf_repr(self):
         node = LeafNode("p", "This is a paragraph", {"class": "text"})
@@ -91,14 +96,16 @@ class TestLeafNode(unittest.TestCase):
         self.assertNotEqual(node1, node2)
 
     def test_leaf_with_multiple_props(self):
-        node = LeafNode("img", "", {"src": "image.jpg", "alt": "Test image", "width": "100"})
+        node = LeafNode(
+            "img", "", {"src": "image.jpg", "alt": "Test image", "width": "100"})
         expected = '<img src="image.jpg" alt="Test image" width="100"></img>'
         self.assertEqual(node.to_html(), expected)
 
     def test_leaf_with_special_characters_in_value(self):
         node = LeafNode("p", "Text with <special> & characters")
         # Note: This doesn't escape HTML entities, which might be a design choice
-        self.assertEqual(node.to_html(), "<p>Text with <special> & characters</p>")
+        self.assertEqual(
+            node.to_html(), "<p>Text with <special> & characters</p>")
 
     def test_leaf_with_numbers_in_value(self):
         node = LeafNode("span", "123")
