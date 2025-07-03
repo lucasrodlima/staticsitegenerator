@@ -8,10 +8,10 @@ class ParentNode(HTMLNode):
     def to_html(self):
         if self.tag is None:
             raise ValueError("Error: No tag provided for ParentNode.")
-        elif self.children is None:
+        elif self.children is None or len(self.children) == 0:
             raise ValueError("Error: No children provided for ParentNode.")
         else:
-            end_string = f"<{self.tag}>"
+            end_string = f"<{self.tag}{self.props_to_html()}>"
             for child in self.children:
                 child_string = child.to_html()
                 end_string += child_string
