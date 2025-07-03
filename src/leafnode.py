@@ -8,7 +8,7 @@ class LeafNode(HTMLNode):
 
     def to_html(self):
         if self.value is None:
-            return ValueError("Error: No value provided for LeafNode.")
+            raise ValueError("Error: No value provided for LeafNode.")
         elif self.tag is None:
             return self.value
         else:

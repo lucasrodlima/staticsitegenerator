@@ -14,6 +14,12 @@ class TestHTMLNode(unittest.TestCase):
         node2 = HTMLNode("img", props={"src": "image.png", "alt": "An image"})
         self.assertEqual(node, node2)
 
+    def test_to_html(self):
+        node = HTMLNode("p", "This is a paragraph")
+        with self.assertRaises(NotImplementedError) as e:
+            node.to_html()
+        self.assertEqual(str(e.exception), "Error: to_html method not implemented")
+
     def test_props_to_html(self):
         node = HTMLNode(
             "a",
