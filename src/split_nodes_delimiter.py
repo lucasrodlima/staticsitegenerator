@@ -10,6 +10,9 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
         match text_type:
             case TextType.CODE:
+                if delimiter != "`":
+                    raise ValueError("Delimiter for code must be '`'")
+
                 split_text = node.text.split(delimiter)
 
                 new_nodes.extend([
@@ -19,6 +22,9 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 ])
 
             case TextType.BOLD:
+                if delimiter != "**":
+                    raise ValueError("Delimiter for bold must be '**'")
+
                 split_text = node.text.split(delimiter)
 
                 new_nodes.extend([
@@ -28,6 +34,9 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 ])
 
             case TextType.ITALIC:
+                if delimiter != "_":
+                    raise ValueError("Delimiter for italic must be '_'")
+
                 split_text = node.text.split(delimiter)
 
                 new_nodes.extend([
