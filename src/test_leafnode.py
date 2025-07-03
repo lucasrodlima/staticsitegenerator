@@ -26,3 +26,7 @@ class TestLeafNode(unittest.TestCase):
             str(e.exception),
             "LeafNode.__init__() got an unexpected keyword argument 'children'",
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
