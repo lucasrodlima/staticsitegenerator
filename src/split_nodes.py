@@ -75,10 +75,11 @@ def split_nodes_image(old_nodes):
 
             node.text = node.text.split(image_text, 1)[1]
 
-            if image == images[-1]:
+            if image == images[-1] and node.text:
                 new_nodes.append(TextNode(node.text, TextType.TEXT))
 
     return new_nodes
+
 
 def split_nodes_link(old_nodes):
     old_nodes = old_nodes.copy()
@@ -100,7 +101,7 @@ def split_nodes_link(old_nodes):
 
             node.text = node.text.split(link_text, 1)[1]
 
-            if link == links[-1]:
+            if link == links[-1] and node.text:
                 new_nodes.append(TextNode(node.text, TextType.TEXT))
 
     return new_nodes
