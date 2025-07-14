@@ -43,7 +43,7 @@ class TestRegexFunctions(unittest.TestCase):
         matches = extract_markdown_images(text)
         self.assertListEqual([("image", "https://example.com/img.png")], matches)
 
-    def text_extract_markdown_links_with_images_mixed(self):
+    def test_extract_markdown_links_with_images_mixed(self):
         text = "Mixed content: [link](https://example.com) and ![image](https://example.com/img.png)"
         matches = extract_markdown_links(text)
         self.assertListEqual([("link", "https://example.com")], matches)
