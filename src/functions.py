@@ -1,7 +1,37 @@
-from textnode import TextNode, TextType
-from regex_functions import extract_markdown_images, extract_markdown_links
+import re
+from classes import TextNode, TextType, LeafNode
 
 
+# Text node to HTML conversion
+def text_node_to_html(text_node):
+    match text_node.text_type:
+        case TextType.TEXT:
+            return LeafNode(value=text_node.text)
+        case TextType.BOLD:
+            return LeafNode("b", text_node.text)
+        case TextType.ITALIC:
+            return LeafNode("i", text_node.text)
+        case TextType.CODE:
+            return LeafNode("code", text_node.text)
+        case TextType.LINK:
+            return LeafNode("a", text_node.text, {"href": text_node.url})
+        case TextType.IMAGE:
+            return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
+        case _:
+            raise Exception("TextNode type not supported: " +
+                            str(text_node.text_type))
+
+
+# Regex functions
+def extract_markdown_images(text):
+    return re.findall(r"\!\[(.*?)\]\((.*?)\)", text)
+    
+
+def extract_markdown_links(text):
+    return re.findall(r"(?<!\!)\[(.*?)\]\((.*?)\)", text)
+
+
+# Split nodes functions
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     old_nodes = old_nodes.copy()
     new_nodes = []
@@ -110,7 +140,7 @@ def split_nodes_image(old_nodes):
                 new_nodes.append(TextNode(node.text, TextType.TEXT))
 
     return new_nodes
-# more unit tests
+
 
 def split_nodes_link(old_nodes):
     old_nodes = old_nodes.copy()
@@ -136,4 +166,30 @@ def split_nodes_link(old_nodes):
                 new_nodes.append(TextNode(node.text, TextType.TEXT))
 
     return new_nodes
-# more unit tests
+
+
+# Text to text nodes conversion
+def text_to_textnodes(text):
+    initial_node = TextNode(text, TextType.TEXT)
+
+    code_separated = split_nodes_delimiter([initial_node], "`", TextType.CODE)
+
+    bold_separated = split_nodes_delimiter(code_separated, "**", TextType.BOLD)
+
+    italic_separated = split_nodes_delimiter(bold_separated, "_", TextType.ITALIC)
+
+    image_separated = split_nodes_image(italic_separated)
+
+    link_separated = split_nodes_link(image_separated)
+
+    return link_separated
+
+
+# Markdown to blocks function
+def markdown_to_blocks(markdown):
+    blocks = list(
+        filter(lambda x: x != "", map(lambda x: x.strip(), markdown.split("\n\n")))
+    )
+
+    return blocks
+
