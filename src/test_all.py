@@ -1,10 +1,10 @@
 import unittest
 
-from classes import TextNode, TextType, HTMLNode, LeafNode, ParentNode
+from classes import TextNode, TextType, HTMLNode, LeafNode, ParentNode, BlockType
 from functions import (
     text_node_to_html, extract_markdown_images, extract_markdown_links,
     split_nodes_delimiter, split_nodes_image, split_nodes_link,
-    text_to_textnodes, markdown_to_blocks
+    text_to_textnodes, markdown_to_blocks, block_to_blocktype
 )
 
 
@@ -810,14 +810,14 @@ This is **bolded** paragraph
 This is another paragraph with *italic* text and `code` here
 This is the same paragraph on a new line
 
-* This is a list
-* with items
+- This is a list
+- with items
 """
         blocks = markdown_to_blocks(markdown)
         expected = [
             "This is **bolded** paragraph",
             "This is another paragraph with *italic* text and `code` here\nThis is the same paragraph on a new line",
-            "* This is a list\n* with items"
+            "- This is a list\n- with items"
         ]
         self.assertEqual(blocks, expected)
 
@@ -870,9 +870,9 @@ This is a paragraph with **bold** and *italic* text.
 
 ## Heading 2
 
-* List item 1
-* List item 2
-* List item 3
+1. List item 1
+2. List item 2
+3. List item 3
 
 Another paragraph here.
 
@@ -888,12 +888,80 @@ Final paragraph.
             "# Heading 1",
             "This is a paragraph with **bold** and *italic* text.",
             "## Heading 2",
-            "* List item 1\n* List item 2\n* List item 3",
+            "1. List item 1\n2. List item 2\n3. List item 3",
             "Another paragraph here.",
             "```python\ndef hello():\n    print(\"Hello, world!\")\n```",
             "Final paragraph."
         ]
         self.assertEqual(blocks, expected)
+
+
+class TestBlockToBlockTypes(unittest.TestCase):
+    def test_unordered_list_block_to_block_type(self):
+        block = "- This is a list\n- with a few\n- items"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.UNORDERED_LIST)
+
+    def test_ordered_list_block_to_block_type(self):
+        block = "1. This is a list\n2. with a few\n3. items"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.ORDERED_LIST)
+
+    def test_paragraph_block_to_block_type(self):
+        block = "This is a paragraph with some text."
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.PARAGRAPH)
+
+    def test_code_block_to_block_type(self):
+        block = "```python\nprint('Hello, world!')\n```"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.CODE)
+
+    def test_quote_block_to_block_type(self):
+        block = "> This is a quote\n> with multiple lines"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.QUOTE)
+
+    def test_heading_block_to_block_type(self):
+        block = "# This is a heading"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_heading_two_block_to_block_type(self):
+        block = "## This is a subheading"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_heading_three_block_to_block_type(self):
+        block = "### This is a sub-subheading"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_heading_four_block_to_block_type(self):
+        block = "#### This is a sub-sub-subheading"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_heading_five_block_to_block_type(self):
+        block = "##### This is a sub-sub-sub-subheading"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_heading_six_block_to_block_type(self):
+        block = "###### This is a sub-sub-sub-sub-subheading"
+        
+        block_type = block_to_blocktype(block)
+        self.assertEqual(block_type, BlockType.HEADING)
 
 
 if __name__ == "__main__":

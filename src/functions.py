@@ -1,5 +1,5 @@
 import re
-from classes import TextNode, TextType, LeafNode
+from classes import TextNode, TextType, LeafNode, BlockType
 
 
 # Text node to HTML conversion
@@ -193,3 +193,42 @@ def markdown_to_blocks(markdown):
 
     return blocks
 
+
+def block_to_blocktype(block):
+    if block.startswith("# ") and "\n" not in block:
+        return BlockType.HEADING
+    elif block.startswith("## ") and "\n" not in block:
+        return BlockType.HEADING
+    elif block.startswith("### ") and "\n" not in block:
+        return BlockType.HEADING
+    elif block.startswith("#### ") and "\n" not in block:
+        return BlockType.HEADING
+    elif block.startswith("##### ") and "\n" not in block:
+        return BlockType.HEADING
+    elif block.startswith("###### ") and "\n" not in block:
+        return BlockType.HEADING
+
+    elif block.startswith("```") and block.endswith("```"):
+        return BlockType.CODE
+
+    elif block.startswith("> "):
+        lines = block.split("\n")
+        if all(map(lambda x: x.startswith("> "), lines)):
+            return BlockType.QUOTE
+    
+    elif block.startswith("- "):
+        lines = block.split("\n")
+        if all(map(lambda x: x.startswith("- "), lines)):
+            return BlockType.UNORDERED_LIST
+
+    elif block[0] == "1" and block[1] == ".":
+        lines = block.split("\n")
+        if all(map(lambda x: x[0].isdigit() and x[1] == ".", lines)):
+            nums = []
+            for line in lines:
+                nums.append(int(line.split(".")[0]))
+            if nums == list(range(1, len(nums) + 1)):
+                return BlockType.ORDERED_LIST
+
+    else:
+        return BlockType.PARAGRAPH
