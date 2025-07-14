@@ -41,6 +41,24 @@ class SplitNodesDelimiterTest(unittest.TestCase):
             ],
         )
 
+    def test_split_multiple_delimiters(self):
+        node = TextNode("This is a text with a `code block`, **bold**, and _italic_ word", TextType.TEXT)
+        code_splitted = split_nodes_delimiter([node], "`", TextType.CODE)
+        bold_splitted = split_nodes_delimiter(code_splitted, "**", TextType.BOLD)
+        new_nodes = split_nodes_delimiter(bold_splitted, "_", TextType.ITALIC)
+        self.assertEqual(
+            new_nodes,
+            [
+                TextNode("This is a text with a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(", ", TextType.TEXT),
+                TextNode("bold", TextType.BOLD),
+                TextNode(", and ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word", TextType.TEXT),
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
