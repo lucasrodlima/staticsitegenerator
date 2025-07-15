@@ -1,4 +1,6 @@
 import re
+import os
+import shutil
 from classes import TextNode, TextType, LeafNode, BlockType, ParentNode
 
 
@@ -315,3 +317,17 @@ def markdown_to_html_node(markdown):
 
     return master_html
     
+
+def copy_directory_contents(src, dest):
+    if os.path.exists(dest):
+        shutil.rmtree(dest)
+    os.mkdir(dest)
+
+    for item in os.listdir(src):
+        if os.path.isfile(os.path.join(src, item)):
+            shutil.copy2(os.path.join(src, item), dest)
+            print(f"Copied file: {os.path.join(src, item)} to {dest}")
+        elif os.path.isdir(os.path.join(src, item)):
+            os.makedirs(os.path.join(dest, item))
+            copy_directory_contents(os.path.join(src, item), os.path.join(dest, item))
+
