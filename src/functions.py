@@ -331,3 +331,11 @@ def copy_directory_contents(src, dest):
             os.makedirs(os.path.join(dest, item))
             copy_directory_contents(os.path.join(src, item), os.path.join(dest, item))
 
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    for line in lines:
+        if line.startswith("# "):
+            return line[2:].strip()
+    raise Exception("No title found in markdown")
+

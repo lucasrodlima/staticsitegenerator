@@ -4,7 +4,7 @@ from classes import TextNode, TextType, HTMLNode, LeafNode, ParentNode, BlockTyp
 from functions import (
     text_node_to_html, extract_markdown_images, extract_markdown_links,
     split_nodes_delimiter, split_nodes_image, split_nodes_link,
-    text_to_textnodes, markdown_to_blocks, block_to_blocktype, markdown_to_html_node
+    text_to_textnodes, markdown_to_blocks, block_to_blocktype, markdown_to_html_node, extract_title
 )
 
 
@@ -1114,6 +1114,22 @@ This is a paragraph with an ![image](https://example.com/image.png) in it.
             '<div><p>This is a paragraph with an <img src="https://example.com/image.png" alt="image"> in it.</p></div>',
         )
 
+
+class TestExtractTitle(unittest.TestCase):
+    def test_extract_title(self):
+        md = """
+# This is the title
+
+This is a paragraph.
+"""
+        title = extract_title(md)
+        self.assertEqual(title, "This is the title")
+
+    def test_extract_title_no_title(self):
+        md = """
+This is a paragraph without a title.
+"""
+        self.assertRaises(Exception, extract_title, md)
 
 if __name__ == "__main__":
     unittest.main()
