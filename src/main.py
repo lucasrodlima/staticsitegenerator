@@ -10,8 +10,8 @@ def main():
 
     shutil.rmtree("docs", ignore_errors=True)  # Clear the public directory
     os.makedirs("docs", exist_ok=True)
-    copy_directory_contents("static", f"docs{basepath}")
-    generate_pages_recursive("content", "template.html", f"docs{basepath}", basepath)
+    copy_directory_contents("static", f"docs")
+    generate_pages_recursive("content", "template.html", f"docs", basepath)
 
 
 if __name__ == "__main__":
