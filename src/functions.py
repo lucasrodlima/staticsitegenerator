@@ -215,7 +215,7 @@ def block_to_blocktype(block):
 
     elif block.startswith("> "):
         lines = block.split("\n")
-        if all(map(lambda x: x.startswith("> "), lines)):
+        if all(line.startswith(">") for line in lines):
             return BlockType.QUOTE
     
     elif block.startswith("- "):
@@ -284,7 +284,8 @@ def markdown_to_html_node(markdown):
                     final_nodes.append( ParentNode(tag="pre", children=[html_node]) )
 
             case BlockType.QUOTE:
-                text = block.lstrip("> ").strip()
+                lines = block.split("\n")
+                text = " ".join(line.lstrip("> ") for line in lines)
                 children_nodes = text_to_children(text)
 
                 final_nodes.append( ParentNode(tag="blockquote", children=children_nodes ) )

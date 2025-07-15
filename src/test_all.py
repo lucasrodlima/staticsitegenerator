@@ -1114,6 +1114,43 @@ This is a paragraph with an ![image](https://example.com/image.png) in it.
             '<div><p>This is a paragraph with an <img src="https://example.com/image.png" alt="image"> in it.</p></div>',
         )
 
+    def test_multiline_quote(self):
+        md = """
+> This is a quote
+> that spans multiple lines.
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><blockquote>This is a quote that spans multiple lines.</blockquote></div>',
+        )
+
+    def test_mixed_content_with_multiline_quote(self):
+        md = """
+# Heading
+
+This is a paragraph with **bold** text and _italic_ text.
+
+- List item 1
+- List item 2
+
+> This is a quote that spans multiple lines.
+> It should be rendered correctly.
+
+```
+print("Hello, world!")
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><h1>Heading</h1><p>This is a paragraph with <b>bold</b> text and <i>italic</i> text.</p><ul><li>List item 1</li><li>List item 2</li></ul><blockquote>This is a quote that spans multiple lines. It should be rendered correctly.</blockquote><code>print("Hello, world!")</code></div>',
+        )
+
 
 class TestExtractTitle(unittest.TestCase):
     def test_extract_title(self):
