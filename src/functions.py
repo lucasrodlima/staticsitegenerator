@@ -339,3 +339,27 @@ def extract_title(markdown):
             return line[2:].strip()
     raise Exception("No title found in markdown")
 
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using template {template_path}")
+
+    with open(from_path, 'r') as f:
+        markdown_content = f.read()
+
+    with open(template_path, 'r') as f:
+        template_content = f.read()
+
+    html_node = markdown_to_html_node(markdown_content)
+    html_string = html_node.to_html()
+
+    title = extract_title(markdown_content)
+
+    template_content = template_content.replace("{{ Title }}", title)
+    template_content = template_content.replace("{{ Content }}", html_string)
+
+    dest_dir = os.path.dirname(dest_path)
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
+    with open(dest_path, 'w') as f:
+        f.write(template_content)
