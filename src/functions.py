@@ -1,5 +1,5 @@
 import re
-from classes import TextNode, TextType, LeafNode, BlockType
+from classes import TextNode, TextType, LeafNode, BlockType, ParentNode
 
 
 # Text node to HTML conversion
@@ -232,3 +232,86 @@ def block_to_blocktype(block):
 
     else:
         return BlockType.PARAGRAPH
+
+
+def text_to_children(text):
+    text_nodes = text_to_textnodes(text)
+
+    html_nodes = []
+    for node in text_nodes:
+        html_nodes.append(text_node_to_html(node))
+
+    return html_nodes
+
+
+def markdown_to_html_node(markdown):
+    final_nodes = []
+
+    blocks = markdown_to_blocks(markdown)
+
+    for block in blocks:
+        block_type = block_to_blocktype(block)
+
+        match block_type:
+            case BlockType.PARAGRAPH:
+                lines = block.split("\n")
+                text = " ".join(line.strip() for line in lines)
+
+                children_nodes = text_to_children(text)               
+
+                final_nodes.append( ParentNode(tag="p", children=children_nodes) )
+
+            case BlockType.HEADING:
+                text = block.lstrip("#").strip()
+
+                children_nodes = text_to_children(text)
+
+                header_level = f"h{ block.count("#") }"
+
+                final_nodes.append( ParentNode(tag=f"{ header_level }", children=children_nodes) )
+
+            case BlockType.CODE:
+                text_node = TextNode(block.strip("`\n "), TextType.CODE)
+
+                html_node = text_node_to_html(text_node) 
+
+                if "\n" not in html_node.value:
+                    final_nodes.append(html_node)
+                else:
+                    html_node.value += "\n"
+                    final_nodes.append( ParentNode(tag="pre", children=[html_node]) )
+
+            case BlockType.QUOTE:
+                text = block.lstrip("> ").strip()
+                children_nodes = text_to_children(text)
+
+                final_nodes.append( ParentNode(tag="blockquote", children=children_nodes ) )
+
+            case BlockType.UNORDERED_LIST:
+                items = block.split("\n")
+
+                list_items = []
+
+                for item in items:
+                    children_nodes = text_to_children(item.strip("- "))
+
+                    list_items.append( ParentNode(tag="li", children=children_nodes ) )
+
+                final_nodes.append( ParentNode(tag="ul", children=list_items) )
+
+            case BlockType.ORDERED_LIST:
+                items = block.split("\n")
+
+                list_items = []
+
+                for item in items:
+                    children_nodes = text_to_children(item.strip("1234567890. "))
+
+                    list_items.append( ParentNode(tag="li", children=children_nodes) )
+
+                final_nodes.append( ParentNode(tag="ol", children=list_items ))
+                
+    master_html = ParentNode( tag="div", children=final_nodes )
+
+    return master_html
+    

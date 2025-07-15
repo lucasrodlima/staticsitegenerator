@@ -4,7 +4,7 @@ from classes import TextNode, TextType, HTMLNode, LeafNode, ParentNode, BlockTyp
 from functions import (
     text_node_to_html, extract_markdown_images, extract_markdown_links,
     split_nodes_delimiter, split_nodes_image, split_nodes_link,
-    text_to_textnodes, markdown_to_blocks, block_to_blocktype
+    text_to_textnodes, markdown_to_blocks, block_to_blocktype, markdown_to_html_node
 )
 
 
@@ -338,7 +338,7 @@ class TestLeafNode(unittest.TestCase):
     def test_leaf_with_multiple_props(self):
         node = LeafNode(
             "img", "", {"src": "image.jpg", "alt": "Test image", "width": "100"})
-        expected = '<img src="image.jpg" alt="Test image" width="100"></img>'
+        expected = '<img src="image.jpg" alt="Test image" width="100">'
         self.assertEqual(node.to_html(), expected)
 
     def test_leaf_with_special_characters_in_value(self):
@@ -962,6 +962,157 @@ class TestBlockToBlockTypes(unittest.TestCase):
         
         block_type = block_to_blocktype(block)
         self.assertEqual(block_type, BlockType.HEADING)
+
+
+class TestMarkdownToHtmlNode(unittest.TestCase):
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_headings(self):
+        md = """
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3></div>",
+        )
+    
+    def test_code(self):
+        md = """
+```
+def hello():
+    print("Hello, world!")
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><pre><code>def hello():\n    print("Hello, world!")\n</code></pre></div>',
+        )
+
+    def test_code_oneline(self):
+        md = """
+```
+This is Code.
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><code>This is Code.</code></div>',
+        )
+
+    def test_quotes(self):
+        md = "> This is a **quote**"
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><blockquote>This is a <b>quote</b></blockquote></div>',
+        )
+
+    def test_unordered_list(self):
+        md = """
+- This is a list
+- with items
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><ul><li>This is a list</li><li>with items</li></ul></div>',
+        )
+
+    def test_ordered_list(self):
+        md = """
+1. This is a list
+2. with items
+3. and more items
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><ol><li>This is a list</li><li>with items</li><li>and more items</li></ol></div>',
+        )
+
+    def test_mixed_content(self):
+        md = """
+# Heading
+
+This is a paragraph with **bold** text and _italic_ text.
+
+- List item 1
+- List item 2
+
+> This is a quote.
+
+```
+print("Hello, world!")
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><h1>Heading</h1><p>This is a paragraph with <b>bold</b> text and <i>italic</i> text.</p><ul><li>List item 1</li><li>List item 2</li></ul><blockquote>This is a quote.</blockquote><code>print("Hello, world!")</code></div>',
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
+
+    def test_paragraph_with_image(self):
+        md = """
+This is a paragraph with an ![image](https://example.com/image.png) in it.
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><p>This is a paragraph with an <img src="https://example.com/image.png" alt="image"> in it.</p></div>',
+        )
 
 
 if __name__ == "__main__":

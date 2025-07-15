@@ -82,6 +82,8 @@ class LeafNode(HTMLNode):
             raise ValueError("Error: No value provided for LeafNode.")
         elif self.tag is None:
             return self.value
+        elif self.tag == "img":
+            return f"<{self.tag}{self.props_to_html()}>"
         else:
             return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
