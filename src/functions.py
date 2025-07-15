@@ -20,14 +20,13 @@ def text_node_to_html(text_node):
         case TextType.IMAGE:
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         case _:
-            raise Exception("TextNode type not supported: " +
-                            str(text_node.text_type))
+            raise Exception("TextNode type not supported: " + str(text_node.text_type))
 
 
 # Regex functions
 def extract_markdown_images(text):
     return re.findall(r"\!\[(.*?)\]\((.*?)\)", text)
-    
+
 
 def extract_markdown_links(text):
     return re.findall(r"(?<!\!)\[(.*?)\]\((.*?)\)", text)
@@ -53,7 +52,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     continue
 
                 while delimiter in node.text:
-
                     split_text = node.text.split(delimiter, 2)
 
                     node.text = split_text[2]
@@ -90,7 +88,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
                     if node.text and delimiter not in node.text:
                         new_nodes.append(TextNode(node.text, TextType.TEXT))
-                
 
             case TextType.ITALIC:
                 if delimiter != "_":
@@ -120,9 +117,9 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
 def split_nodes_image(old_nodes):
     old_nodes = old_nodes.copy()
-    new_nodes = [] # [node]
+    new_nodes = []  # [node]
 
-    for node in old_nodes: # text, TextType
+    for node in old_nodes:  # text, TextType
         images = extract_markdown_images(node.text)
 
         if len(images) == 0:
@@ -217,7 +214,7 @@ def block_to_blocktype(block):
         lines = block.split("\n")
         if all(line.startswith(">") for line in lines):
             return BlockType.QUOTE
-    
+
     elif block.startswith("- "):
         lines = block.split("\n")
         if all(map(lambda x: x.startswith("- "), lines)):
@@ -259,36 +256,40 @@ def markdown_to_html_node(markdown):
                 lines = block.split("\n")
                 text = " ".join(line.strip() for line in lines)
 
-                children_nodes = text_to_children(text)               
+                children_nodes = text_to_children(text)
 
-                final_nodes.append( ParentNode(tag="p", children=children_nodes) )
+                final_nodes.append(ParentNode(tag="p", children=children_nodes))
 
             case BlockType.HEADING:
                 text = block.lstrip("#").strip()
 
                 children_nodes = text_to_children(text)
 
-                header_level = f"h{ block.count("#") }"
+                header_level = f"h{block.count('#')}"
 
-                final_nodes.append( ParentNode(tag=f"{ header_level }", children=children_nodes) )
+                final_nodes.append(
+                    ParentNode(tag=f"{header_level}", children=children_nodes)
+                )
 
             case BlockType.CODE:
                 text_node = TextNode(block.strip("`\n "), TextType.CODE)
 
-                html_node = text_node_to_html(text_node) 
+                html_node = text_node_to_html(text_node)
 
                 if "\n" not in html_node.value:
                     final_nodes.append(html_node)
                 else:
                     html_node.value += "\n"
-                    final_nodes.append( ParentNode(tag="pre", children=[html_node]) )
+                    final_nodes.append(ParentNode(tag="pre", children=[html_node]))
 
             case BlockType.QUOTE:
                 lines = block.split("\n")
                 text = " ".join(line.lstrip("> ") for line in lines)
                 children_nodes = text_to_children(text)
 
-                final_nodes.append( ParentNode(tag="blockquote", children=children_nodes ) )
+                final_nodes.append(
+                    ParentNode(tag="blockquote", children=children_nodes)
+                )
 
             case BlockType.UNORDERED_LIST:
                 items = block.split("\n")
@@ -298,9 +299,9 @@ def markdown_to_html_node(markdown):
                 for item in items:
                     children_nodes = text_to_children(item.strip("- "))
 
-                    list_items.append( ParentNode(tag="li", children=children_nodes ) )
+                    list_items.append(ParentNode(tag="li", children=children_nodes))
 
-                final_nodes.append( ParentNode(tag="ul", children=list_items) )
+                final_nodes.append(ParentNode(tag="ul", children=list_items))
 
             case BlockType.ORDERED_LIST:
                 items = block.split("\n")
@@ -310,14 +311,14 @@ def markdown_to_html_node(markdown):
                 for item in items:
                     children_nodes = text_to_children(item.strip("1234567890. "))
 
-                    list_items.append( ParentNode(tag="li", children=children_nodes) )
+                    list_items.append(ParentNode(tag="li", children=children_nodes))
 
-                final_nodes.append( ParentNode(tag="ol", children=list_items ))
-                
-    master_html = ParentNode( tag="div", children=final_nodes )
+                final_nodes.append(ParentNode(tag="ol", children=list_items))
+
+    master_html = ParentNode(tag="div", children=final_nodes)
 
     return master_html
-    
+
 
 def copy_directory_contents(src, dest):
     if os.path.exists(dest):
@@ -341,13 +342,15 @@ def extract_title(markdown):
     raise Exception("No title found in markdown")
 
 
-def generate_page(from_path, template_path, dest_path):
-    print(f"Generating page from {from_path} to {dest_path} using template {template_path}")
+def generate_page(from_path, template_path, dest_path, basepath):
+    print(
+        f"Generating page from {from_path} to {dest_path} using template {template_path}"
+    )
 
-    with open(from_path, 'r') as f:
+    with open(from_path, "r") as f:
         markdown_content = f.read()
 
-    with open(template_path, 'r') as f:
+    with open(template_path, "r") as f:
         template_content = f.read()
 
     html_node = markdown_to_html_node(markdown_content)
@@ -358,19 +361,32 @@ def generate_page(from_path, template_path, dest_path):
     template_content = template_content.replace("{{ Title }}", title)
     template_content = template_content.replace("{{ Content }}", html_string)
 
+    template_content = template_content.replace('href="/', f'href="{basepath}')
+    template_content = template_content.replace('src="/', f'src="{basepath}')
+
     dest_dir = os.path.dirname(dest_path)
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
-    with open(dest_path, 'w') as f:
+    with open(dest_path, "w") as f:
         f.write(template_content)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     for item in os.listdir(dir_path_content):
         if os.path.isdir(os.path.join(dir_path_content, item)):
             new_dest_dir = os.path.join(dest_dir_path, item)
             os.makedirs(new_dest_dir, exist_ok=True)
-            generate_pages_recursive(os.path.join(dir_path_content, item), template_path, new_dest_dir)
+            generate_pages_recursive(
+                os.path.join(dir_path_content, item),
+                template_path,
+                new_dest_dir,
+                basepath,
+            )
         elif item.endswith(".md"):
-            generate_page(os.path.join(dir_path_content, item), template_path, os.path.join(dest_dir_path, item.replace(".md", ".html")))
+            generate_page(
+                os.path.join(dir_path_content, item),
+                template_path,
+                os.path.join(dest_dir_path, item.replace(".md", ".html")),
+                basepath,
+            )
